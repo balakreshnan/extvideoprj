@@ -1,0 +1,22 @@
+{
+    "description": "Sample marketing video analyzer",
+    "scenario": "videoShot",
+    "fieldSchema": {
+      "fields": {
+        "Description": {
+          "type": "string",
+          "description": "Detailed summary of the video segment, focusing on product characteristics, lighting, and color palette."
+        },
+        "Title": {
+          "type": "string",
+          "kind": "generate",
+          "description": "Summarize the video"
+        },
+        "Sentiment": {
+          "type": "string",
+          "method": "classify",
+          "enum": [ "Positive", "Neutral", "Negative" ]
+        }
+      }
+    }
+  }

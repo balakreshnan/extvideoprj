@@ -1,0 +1,13 @@
+{
+  "description": "Sample chart analyzer",
+  "scenario": "image",
+  "fieldSchema": {
+    "fields": {
+      "Title": {
+        "type": "string",
+        "kind": "generate",
+        "description": "Summarize the video"
+      }
+    }
+  }
+}
