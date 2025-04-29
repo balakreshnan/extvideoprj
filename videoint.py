@@ -1,3 +1,4 @@
+import base64
 import streamlit as st
 import requests
 import json
@@ -138,16 +139,30 @@ def videoint():
 
         if st.button("Process Video"):
             url = f"{endpoint}/contentunderstanding/analyzers/{analyzerId}:analyze?api-version={api_version}"
-
+            # url = f"{endpoint}/contentunderstanding/analyzers/{analyzerId}:analyze?_overload=analyzeBinary&api-version={api_version}"
+            
             headers = {
                 "Ocp-Apim-Subscription-Key": key,
                 "Content-Type": "application/json"
             }
 
-            fileUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
+            # fileUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
+            # fileUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4"
 
-            data = json.dumps({"url": fileUrl})
+            # data = json.dumps({"url": fileUrl})
 
+            # Open the MP4 file in binary read mode
+            file_location = "SubaruOutbackOnStreetAndDirt.mp4"
+            with open(file_location, "rb") as file:
+                data = file.read()
+
+            # url = f"{endpoint}/contentunderstanding/analyzers/{analyzerId}:analyze?_overload=analyzeBinary&api-version={api_version}"
+            headers = {
+                "Ocp-Apim-Subscription-Key": key,
+                "Content-Type": "application/octet-stream"
+            }
+
+            #response = requests.post(url, headers=headers, data=data)
             response = requests.post(url, headers=headers, data=data)
 
             st.write(f"{response.status_code} with Text: {response.text}")
