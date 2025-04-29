@@ -7,6 +7,7 @@ import time
 from dotenv import load_dotenv
 load_dotenv()
 
+# st.set_option('server.maxUploadSize', 1024)  # in MB, adjust as needed
 
 # Initialize session state
 if 'operationId' not in st.session_state:
@@ -136,6 +137,25 @@ def videoint():
                 response = requests.put(url, headers=headers, data=data)
 
                 st.write(f"{response.status_code} with Text: {response.text}")
+        # File uploader widget
+        uploaded_file = st.file_uploader("Choose an MP4 file", type=["mp4"])
+
+        # Check if a file was uploaded
+        if uploaded_file is not None:
+            # Display file details
+            st.write("File Name:", uploaded_file.name)
+            st.write("File Size:", f"{uploaded_file.size / (1024 * 1024):.2f} MB")
+            
+            # Read and display the video
+            video_file = uploaded_file.read()
+            st.video(video_file)
+            
+            # Optional: Save the uploaded file
+            # with open(uploaded_file.name, "wb") as f:
+            #     f.write(video_file)
+            # st.success(f"File saved as {uploaded_file.name}")
+        else:
+            st.info("Please upload an MP4 file.")
 
         if st.button("Process Video"):
             url = f"{endpoint}/contentunderstanding/analyzers/{analyzerId}:analyze?api-version={api_version}"
@@ -150,6 +170,12 @@ def videoint():
             # fileUrl = "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4"
 
             # data = json.dumps({"url": fileUrl})
+
+            
+
+            if uploaded_file is not None:
+                # Read and display the video
+                data = uploaded_file.read()
 
             # Open the MP4 file in binary read mode
             file_location = "SubaruOutbackOnStreetAndDirt.mp4"
@@ -201,45 +227,8 @@ def videoint():
             # Parse the contents
             contents = data["result"]["contents"]
 
-            # Function to convert milliseconds to time format (MM:SS.mmm)
-            def ms_to_time(ms):
-                seconds, milliseconds = divmod(ms, 1000)
-                minutes, seconds = divmod(seconds, 60)
-                return f"{minutes:02d}:{seconds:02d}.{milliseconds:03d}"
-
-            # Extract and print key information for each shot
-            for shot in contents:
-                start_time_ms = shot["startTimeMs"]
-                end_time_ms = shot["endTimeMs"]
-                title = shot["fields"]["title"]["valueString"]
-                description = shot["fields"]["description"]["valueString"]
-                sentiment = shot["fields"]["sentiment"]["valueString"]
-                key_frames = shot["markdown"].split("## Key Frames\n")[1].split("\n")[:-1]
-                width = shot["width"]
-                height = shot["height"]
-
-                st.write(f"Shot: {ms_to_time(start_time_ms)} => {ms_to_time(end_time_ms)}")
-                st.write(f"Title: {title}")
-                st.write(f"Description: {description}")
-                st.write(f"Sentiment: {sentiment}")
-                st.write(f"Key Frames: {', '.join(frame.strip('- ') for frame in key_frames)}")
-                st.write(f"Resolution: {width}x{height}")
-                st.write("-" * 50)
-                st.write("---------------------------------------------------------------------------")
-
-            # Optionally, save the parsed data to a file
-            # output_data = []
-            # for shot in contents:
-            #     output_data.append({
-            #         "start_time": ms_to_time(shot["startTimeMs"]),
-            #         "end_time": ms_to_time(shot["endTimeMs"]),
-            #         "title": shot["fields"]["title"]["valueString"],
-            #         "description": shot["fields"]["description"]["valueString"],
-            #         "sentiment": shot["fields"]["sentiment"]["valueString"],
-            #         "key_frames": [frame.strip("- ") for frame in shot["markdown"].split("## Key Frames\n")[1].split("\n")[:-1]],
-            #         "resolution": f"{shot['width']}x{shot['height']}"
-            #     })
-
+        file_location = "SubaruOutbackOnStreetAndDirt.mp4"
+        st.video(file_location)
 
     with tab2:
         st.header("Analyze")
@@ -254,20 +243,52 @@ def videoint():
 
                     response = requests.get(url, headers=headers)
 
-                    print(response.status_code)
+                    # print(response.status_code)
                     # print(response.text)
 
-                    rs = json.loads(response.text)
-                    #print(rs["status"])
+                    # st.write(f"{response.status_code} with Text: {response.text}")
 
-                    rs1 = rs["result"]
-                    #print(rs1)
-                    # print(rs1["contents"])[0]["fields"]["Title"]["valueString"]
-                    # Extract and print the valueString content
-                    if rs1.get("contents"):
-                        for content in rs1["contents"]:
-                            title_field = content.get("fields", {}).get("Title", {})
-                            value_string = title_field.get("valueString")
-                            if value_string:
-                                print('Content extracted: ' , value_string)
-                                st.markdown(value_string)
+                    # rs = json.loads(response.text)
+                    # #print(rs["status"])
+
+                    # rs1 = rs["result"]
+                    # #print(rs1)
+                    # # print(rs1["contents"])[0]["fields"]["Title"]["valueString"]
+                    # # Extract and print the valueString content
+                    # if rs1.get("contents"):
+                    #     for content in rs1["contents"]:
+                    #         title_field = content.get("fields", {}).get("Title", {})
+                    #         value_string = title_field.get("valueString")
+                    #         if value_string:
+                    #             print('Content extracted: ' , value_string)
+                    #             st.markdown(value_string)
+                    data = json.loads(response.text)
+                    #parse_json(data)
+                    # Parse the contents
+                    contents = data["result"]["contents"]
+
+                    # # Function to convert milliseconds to time format (MM:SS.mmm)
+                    def ms_to_time(ms):
+                        seconds, milliseconds = divmod(ms, 1000)
+                        minutes, seconds = divmod(seconds, 60)
+                        return f"{minutes:02d}:{seconds:02d}.{milliseconds:03d}"
+
+                    # # Extract and print key information for each shot
+                    for shot in contents:
+                        start_time_ms = shot["startTimeMs"]
+                        end_time_ms = shot["endTimeMs"]
+                        title = shot["fields"]["title"]["valueString"]
+                        description = shot["fields"]["description"]["valueString"]
+                        sentiment = shot["fields"]["sentiment"]["valueString"]
+                        key_frames = shot["markdown"].split("## Key Frames\n")[1].split("\n")[:-1]
+                        width = shot["width"]
+                        height = shot["height"]
+
+                        st.markdown(f"Shot: {ms_to_time(start_time_ms)} => {ms_to_time(end_time_ms)}")
+                        st.markdown(f"Title: {title}")
+                        st.markdown(f"Description: {description}")
+                        st.markdown(f"Sentiment: {sentiment}")
+                        st.markdown(f"Key Frames: {', '.join(frame.strip('- ') for frame in key_frames)}")
+                        st.markdown(f"Resolution: {width}x{height}")
+                        st.markdown("-" * 50)
+            st.write("Completed.............................")

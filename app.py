@@ -14,6 +14,7 @@ st.set_page_config(
     layout="wide",  # or "centered"
     initial_sidebar_state="expanded"  # or "collapsed"
 )
+# st.set_option('server.maxUploadSize', 1024)  # in MB, adjust as needed
 
 # Load your CSS file
 def load_css(file_path):
